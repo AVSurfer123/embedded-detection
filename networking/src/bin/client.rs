@@ -5,6 +5,7 @@ use std::time::{Duration, SystemTime};
 const IMAGE_DIR: &str = "images";
 const LABEL_DIR: &str = "labels";
 const WEIGHT_DIR: &str = "weights";
+const SERVER_ADDR: &str = "100.122.154.52:7887";
 
 fn main() {
     let mut init_time: u64 = 0;
@@ -19,9 +20,12 @@ fn main() {
             init_time = arg.parse().unwrap();
         }
     }
+    std::fs::create_dir_all(IMAGE_DIR).unwrap();
+    std::fs::create_dir_all(LABEL_DIR).unwrap();
+    std::fs::create_dir_all(WEIGHT_DIR).unwrap();
 
     loop {
-        let res = TcpStream::connect("127.0.0.1:7887");
+        let res = TcpStream::connect(SERVER_ADDR);
         if res.is_err() {
             println!("Could not connect to server, retrying...");
             std::thread::sleep(Duration::from_secs(1));

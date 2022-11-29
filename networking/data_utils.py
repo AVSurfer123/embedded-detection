@@ -28,6 +28,8 @@ def read_new_images(last_time: float) -> Tuple[List[Tuple[np.ndarray, Any]], flo
                 and label is a JSON object of the necessary labels for training
             New last_time to use, which is the latest image read from disk
     """
+    os.makedirs(SERVER_IMAGE_DIR, exist_ok=True)
+    os.makedirs(SERVER_LABEL_DIR, exist_ok=True)
     data = []
     max_time = last_time
     for file_name in os.listdir(SERVER_IMAGE_DIR):
@@ -53,6 +55,8 @@ def write_image(image: np.ndarray, label: Any):
         image: np array in RGB color space (h, w, 3)
         label: JSON object with necessary labels for training
     """
+    os.makedirs(IMAGE_DIR, exist_ok=True)
+    os.makedirs(LABEL_DIR, exist_ok=True)
     time_ms = time.time_ns() // 1_000_000 
     with open(os.path.join(LABEL_DIR, f"{time_ms}.txt"), 'w') as f:
         json.dump(label, f, sort_keys=True, indent=2)
@@ -72,6 +76,7 @@ def load_weights(model: keras.Model, last_time: float) -> Tuple[bool, float]:
             Success for whether new weights were loaded or no new weights were found,
             New last_time to use which is modification time of model on the disk
     """
+    os.makedirs(WEIGHT_DIR, exist_ok=True)
     file_name = os.path.join(WEIGHT_DIR, "model.h5")
     mtime = os.stat(file_name).st_mtime
     if mtime > last_time:
@@ -91,12 +96,14 @@ def save_weights(model: keras.Model):
 
 
 if __name__ == '__main__':
-    # image = io.imread("/home/ashwin/Downloads/masks.png")
-    # write_image(image, {'testing': 'the json', 'of': 123, 'dreams': np.random.rand(10, 30).tolist()})
+    print('hello i started')
+    image = io.imread("/home/ubuntu/purple_tree.jpg")
+    # image.show()
+    write_image(image, {'testing': 'the json', 'of': 123, 'dreams': np.random.rand(10, 30).tolist()})
 
-    data, last_time = read_new_images(1669250000)
-    print("Last time:", last_time)
+    # data, last_time = read_new_images(1669250000)
+    # print("Last time:", last_time)
 
-    for (img, label) in data:
-        print(img.shape)
-        print(type(label))
+    # for (img, label) in data:
+    #     print(img.shape)
+    #     print(type(label))
