@@ -1,6 +1,8 @@
 import cv2
 import math
 import numpy as np
+import classify_bb
+
 def main():
 # Create tracker object
     tracker = EuclideanDistTracker()
@@ -12,11 +14,6 @@ def main():
     object_detector = cv2.createBackgroundSubtractorMOG2(history=200, varThreshold=100, detectShadows=False)
 
 
-# Speed Parameters
-    #scale = distance(, ) / 2
-
-
-
     while cap.isOpened():
         input("Press Enter to continue...")
         ret, frame = cap.read()
@@ -26,10 +23,11 @@ def main():
 
         #print(height)
         #print(width)
-    # Extract Region of interest
+        
+	# Extract Region of interest
         roi = frame[125: height,0: width]
 
-    # 1. Object Detection
+        # 1. Object Detection
         mask = object_detector.apply(roi)
         #_, mask = cv2.threshold(mask, 254, 255, cv2.THRESH_BINARY)
         mask = cv2.adaptiveThreshold(mask,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
@@ -37,27 +35,34 @@ def main():
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         detections = []
         for cnt in contours:
-        # Calculate area and remove small elements
+            # Calculate area and remove small elements
             area = cv2.contourArea(cnt)
             if area > 100:
-            #cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 2)
+                #cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 2)
                 x, y, w, h = cv2.boundingRect(cnt)
 
 
                 detections.append([x, y, w, h])
 
-    # 2. Object Tracking
+        # 2. Object Tracking
         boxes_ids = tracker.update(detections)
         for box_id in boxes_ids:
             x, y, w, h, id = box_id
             if (w > 80 or h > 60) and (w < 400 and h < 300):
-                cv2.putText(roi, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-                print("Image - Tracker ID: " + str(id) + " speed: " + str(tracker.curr_id_speeds[id]))
+                # Uncomment print statements when tuning, parameters #
+		#cv2.putText(roi, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+                #print("Tracker ID: " + str(id) + " speed: " + str(tracker.curr_id_speeds[id]))
                 #if id == 32:
                 #    print(boxes_ids)
                 #    input("pause here")
                 #print(tracker.curr_id_speeds[id])
                 #cv2.putText(roi, str(tracker.curr_id_speeds[id]), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+                alpha = h/w 
+                #print("Tracker ID: " + str(id) + " speed: " + str(tracker.curr_id_speeds[id]) + " height/width: " + str(alpha))
+                alt_label = classify_bb.classify_bb(tracker.curr_id_speeds[id], alpha)
+                #print(alt_label)
+                cv2.putText(roi, str(alt_label), (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+
                 cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
         #cv2.imshow("roi", roi)
@@ -123,38 +128,21 @@ class EuclideanDistTracker:
                 self.curr_id_speeds[object_id] = 0
                 center = self.center_points[object_id]
                 new_center_points[object_id] = center
-                #print(type(self.prev_center_points))
-                #print(obj_bb_id)
-                #print(type(obj_bb_id))
-                #print(self.prev_center_points)
                 if object_id in self.prev_center_points: #if(len(self.prev_center_points)>0):
-                #print(center)
                     curr_center = []
                     prev_center = []
                     curr_center.append(center[0])
                     curr_center.append(center[1])
-                #print(self.prev_center_points[object_id])
                     prev_center.append(self.prev_center_points[object_id][0])
                     prev_center.append(self.prev_center_points[object_id][1]) 
-            ### CALCULATE SPEED ###
-            #scale = height 
+                    ### CALCULATE SPEED ###
                     scale = h/2 #speed will be calculated with assumption that average height of bounding box is ~2meters
                     dist = distance(prev_center, curr_center)/scale
-                    speed = int(dist/.033) #assuming 30fps
+                    speed = dist/.033 #assuming 30fps video feed
                     if h > 60 or w > 80:
-                    #    print("current coord")
-                    #    print(curr_center)
-                    #    print("prev coord")
-                    #    print(prev_center)
                         if(speed > 0):
-                            print("object id: " + str(object_id) + " speed: " + str(speed))
                             self.curr_id_speeds[object_id] = speed
-		    #new_speeds[object_id] = speed
-
-
-
         # Update dictionary with IDs not used removed
-        #self.curr_id_speeds = new_speeds.copy()
         self.center_points = new_center_points.copy()
         self.prev_center_points = new_center_points.copy()
         
