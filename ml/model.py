@@ -5,6 +5,7 @@ import tensorflow_hub as hub
 def run_model2(input):
     # See: https://tfhub.dev/tensorflow/collections/object_detection/1
     # See: https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2
+    # See: https://github.com/tensorflow/hub/blob/master/examples/colab/tf2_image_retraining.ipynb
     detector = hub.load("https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2")
     input_sample = input[0, :, :, :][np.newaxis, :, :, :]
     detector_output = detector(input_sample)
