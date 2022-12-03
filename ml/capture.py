@@ -12,7 +12,7 @@ def capture_video():
     frames = []
     while(vid.isOpened()):
         ret, frame = vid.read()
-        if ret == True:
+        if ret:
             cv2.imshow('Frame', frame)
             frames.append(frame)
             if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -22,8 +22,6 @@ def capture_video():
 
     vid.release() 
     cv2.destroyAllWindows()
-
-    # return np.array(frames, dtype=np.int8) # ISSUE: RETURN IS TAKING TOO LONG?
     return np.array(frames)
 
 def capture_webcam():
@@ -31,10 +29,13 @@ def capture_webcam():
     if (vid.isOpened()== False): 
         print("Error opening video stream or file")
 
+    frames = []
     while(True):
         ret, frame = vid.read()
-        if ret and debug:
-            print("OK")
+        if ret:
+            if debug:
+                print("OK")
+            frames.append(frame)
     
         # Display the resulting frame
         cv2.imshow('frame', frame)
@@ -49,3 +50,4 @@ def capture_webcam():
     vid.release()
     # Destroy all the windows
     cv2.destroyAllWindows()
+    return np.array(frames)
