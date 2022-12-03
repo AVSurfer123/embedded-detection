@@ -2,4 +2,6 @@
 *.txt
 *.h5
 *.pt
+*.MOV
+*__pycache__
 target/
