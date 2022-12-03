@@ -4,7 +4,7 @@ debug = False
     
 def capture_video():
     # Setup Video/Webcam Stream
-    vid = cv2.VideoCapture('sample.MOV')
+    vid = cv2.VideoCapture('../alt_label/bike_and_ped.mp4')
     if (vid.isOpened()== False): 
         print("Error opening video stream or file")
     
