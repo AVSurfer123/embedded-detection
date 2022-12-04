@@ -1,10 +1,10 @@
 import numpy as np
 from skimage import io
-from tensorflow import keras
+import tensorflow as tf
 import os
 import time
 import json
-from typing import List, Tuple, Any
+from typing import List, Tuple, Any, Optional
 
 IMAGE_DIR = "images"
 LABEL_DIR = "labels"
@@ -63,36 +63,36 @@ def write_image(image: np.ndarray, label: Any):
     # cv2.imwrite(os.path.join(IMAGE_DIR, f"{time_ms}.png"), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
     io.imsave(os.path.join(IMAGE_DIR, f"{time_ms}.png"), image)
 
-def load_weights(model: keras.Model, last_time: float) -> Tuple[bool, float]:
+def load_model(last_time: float) -> Tuple[Optional[tf.lite.Interpreter], float]:
     """
     Client method: Loads weights from disk into the model, if newer weights have arrived from the central server.
 
     Args:
-        model: Keras model to load weights into
         last_time: Only loads the weights if they arrived after this time. Represented as seconds after Unix epoch, like time.time()
 
     Returns:
         Tuple of
-            Success for whether new weights were loaded or no new weights were found,
+            TF Lite Interpreter for new model that is loaded or None if no new model was found,
             New last_time to use which is modification time of model on the disk
     """
     os.makedirs(WEIGHT_DIR, exist_ok=True)
-    file_name = os.path.join(WEIGHT_DIR, "model.h5")
+    file_name = os.path.join(WEIGHT_DIR, "model.tflite")
     mtime = os.stat(file_name).st_mtime
     if mtime > last_time:
-        model.load_weights(os.path.join(WEIGHT_DIR, "model.h5"))
-        return True, mtime
-    return False, last_time
+        interpreter = tf.lite.Interpreter(file_name)
+        return interpreter, mtime
+    return None, last_time
 
-def save_weights(model: keras.Model):
+def save_model(tflite_model):
     """
-    Server method: Saves the existing weights from the model to the disk to send to the edge clients.
+    Server method: Saves the given TFLite model to the disk to send to the edge clients.
 
     Args:
-        model: Keras model to save
+        model: TFLite model to save
     """
     os.makedirs(SERVER_WEIGHT_DIR, exist_ok=True)
-    model.save_weights(os.path.join(SERVER_WEIGHT_DIR, "model.h5"))
+    with open(os.path.join(SERVER_WEIGHT_DIR, "model.tflite"), 'wb') as f:
+        f.write(tflite_model)
 
 
 if __name__ == '__main__':

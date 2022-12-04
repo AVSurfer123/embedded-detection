@@ -10,7 +10,7 @@ These processes will use a Python3 wrapper to read/write data to the disk which 
 
 ## Installation
 First install Rust with
-```
+```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 Then run 
@@ -24,10 +24,13 @@ cargo run --bin client
 to start the client-side networking node.
 
 Finally, interface with the networking node using Python functions inside of `data_utils.py`:
-```
-read_new_images(last_time: float) -> Tuple[List[Tuple[np.ndarray, Any]], float]
+```python
+Client methods:
 write_image(image: np.ndarray, label: Any)
-load_weights(model: keras.Model, last_time: float) -> Tuple[bool, float]
-save_weights(model: keras.Model)
+load_model(last_time: float) -> Tuple[Optional[tf.lite.Interpreter], float]
+
+Server methods:
+read_new_images(last_time: float) -> Tuple[List[Tuple[np.ndarray, Any]], float]
+save_model(tflite_model)
 ```
 The documentation for these functions are in their docstrings.
