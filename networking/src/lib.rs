@@ -8,7 +8,7 @@ pub fn look_for_images(image_dir_name: &str, label_dir_name: &str, last_time: Op
         let entry = &result?;
         let path_name = entry.path();
         // let img_time = entry.metadata()?.modified()?.duration_since(std::time::UNIX_EPOCH).unwrap().as_millis();
-        let file_name = path_name.file_stem().expect("File has no extension").to_str().unwrap();
+        let file_name = path_name.file_stem().unwrap().to_str().unwrap();
         let img_time: u64 = file_name.parse().expect("File name isn't a timestamp");
         if img_time > last_time {
             println!("Adding image {} at time {img_time}", path_name.to_str().unwrap());

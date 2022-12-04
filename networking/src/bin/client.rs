@@ -87,7 +87,7 @@ fn read_weights(mut stream: TcpStream) {
         weight_buf.resize(weight_size as usize, 0);
         stream.read_exact(&mut weight_buf).unwrap();
 
-        let weight_path = format!("{}/model.h5", WEIGHT_DIR);
+        let weight_path = format!("{}/model.tflite", WEIGHT_DIR);
         std::fs::write(weight_path, weight_buf).unwrap();
         println!("Read new weights");
     }
