@@ -6,20 +6,27 @@ const IMAGE_DIR: &str = "images";
 const LABEL_DIR: &str = "labels";
 const WEIGHT_DIR: &str = "weights";
 
-//const SERVER_ADDR: &str = "100.122.154.52:7887";
-const SERVER_ADDR: &str = "10.28.70.33:7887";
-
 fn main() {
     let mut init_time: u64 = 0;
+    let mut server_addr: String = String::from("10.28.70.33:7887");
+
     let mut args_iter = std::env::args();
     if args_iter.len() >= 2 {
         args_iter.next();
-        let arg = args_iter.next().unwrap();
-        if arg == "now" {
-            init_time = SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64;
+        let mut arg = args_iter.next().unwrap();
+
+        if arg != "default" {
+            server_addr = format!("{}:7887", arg);
         }
-        else {
-            init_time = arg.parse().unwrap();
+
+        if args_iter.len() >= 1 {
+            arg = args_iter.next().unwrap();
+            if arg == "now" {
+                init_time = SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64;
+            }
+            else {
+                init_time = arg.parse().unwrap();
+            }
         }
     }
     std::fs::create_dir_all(IMAGE_DIR).unwrap();
@@ -27,9 +34,9 @@ fn main() {
     std::fs::create_dir_all(WEIGHT_DIR).unwrap();
 
     loop {
-        let res = TcpStream::connect(SERVER_ADDR);
+        let res = TcpStream::connect(&server_addr);
         if res.is_err() {
-            println!("Could not connect to server, retrying...");
+            println!("Could not connect to server {server_addr}, retrying...");
             std::thread::sleep(Duration::from_secs(1));
         }
         else {
