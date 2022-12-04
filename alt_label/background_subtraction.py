@@ -3,6 +3,11 @@ import math
 import numpy as np
 import classify_bb
 
+###can be removed later###
+import time 
+####
+
+
 def main():
 # Create tracker object
     tracker = EuclideanDistTracker()
@@ -16,7 +21,11 @@ def main():
 
     while cap.isOpened():
         input("Press Enter to continue...")
+        
+        #can be removed i the future
+        start_time = time.time()
         ret, frame = cap.read()
+        #scale down image for faster processing
         frame = cv2.resize(frame, (640, 360), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
         height, width, _  = frame.shape
 
@@ -61,17 +70,21 @@ def main():
                 #print("Tracker ID: " + str(id) + " speed: " + str(tracker.curr_id_speeds[id]) + " height/width: " + str(alpha))
                 alt_label = classify_bb.classify_bb(tracker.curr_id_speeds[id], alpha)
                 #print(alt_label)
-                cv2.putText(roi, str(alt_label), (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+                #cv2.putText(roi, str(alt_label), (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
 
-                cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 255, 0), 3)
+                #cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
         #cv2.imshow("roi", roi)
-        cv2.imshow("Frame", frame)
-        cv2.imshow("Mask", mask)
+        
+        #cv2.imshow("Frame", frame)
+        #cv2.imshow("Mask", mask)
 
         key = cv2.waitKey(30)
         if key == 27:
             break
+        ##can be removed later
+        print("--- %s seconds ---" % (time.time() - start_time))
+
 
     cap.release()
     cv2.destroyAllWindows()
