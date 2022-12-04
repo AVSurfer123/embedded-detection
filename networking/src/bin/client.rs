@@ -5,7 +5,9 @@ use std::time::{Duration, SystemTime};
 const IMAGE_DIR: &str = "images";
 const LABEL_DIR: &str = "labels";
 const WEIGHT_DIR: &str = "weights";
-const SERVER_ADDR: &str = "100.122.154.52:7887";
+
+//const SERVER_ADDR: &str = "100.122.154.52:7887";
+const SERVER_ADDR: &str = "10.28.70.33:7887";
 
 fn main() {
     let mut init_time: u64 = 0;

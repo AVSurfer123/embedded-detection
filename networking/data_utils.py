@@ -14,6 +14,9 @@ SERVER_IMAGE_DIR = "server_images"
 SERVER_LABEL_DIR = "server_labels"
 SERVER_WEIGHT_DIR = "server_weights"
 
+IMAGE_READ_DELAY = 1.0
+WEIGHT_READ_DELAY = 1.0
+
 def read_new_images(last_time: float) -> Tuple[List[Tuple[np.ndarray, Any]], float]:
     """
     Server method: Reads new images and labels from disk which have been sent by edge clients.
@@ -32,11 +35,12 @@ def read_new_images(last_time: float) -> Tuple[List[Tuple[np.ndarray, Any]], flo
     os.makedirs(SERVER_LABEL_DIR, exist_ok=True)
     data = []
     max_time = last_time
+    cur_time = time.time()
     for file_name in os.listdir(SERVER_IMAGE_DIR):
         file_path = os.path.join(SERVER_IMAGE_DIR, file_name)
         # mtime = os.stat(file_path).st_mtime
         mtime = int(file_name.split('.')[0]) / 1000 
-        if mtime > last_time:
+        if mtime > last_time and (cur_time - os.stat(file_path).st_mtime) > IMAGE_READ_DELAY:
             # img = cv2.imread(file_path, cv2.IMREAD_COLOR)
             # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img = io.imread(file_path)
@@ -75,10 +79,11 @@ def load_model(last_time: float) -> Tuple[Optional[tf.lite.Interpreter], float]:
             TF Lite Interpreter for new model that is loaded or None if no new model was found,
             New last_time to use which is modification time of model on the disk
     """
-    os.makedirs(WEIGHT_DIR, exist_ok=True)
     file_name = os.path.join(WEIGHT_DIR, "model.tflite")
+    if not os.path.exists(file_name):
+        return None, last_time
     mtime = os.stat(file_name).st_mtime
-    if mtime > last_time:
+    if mtime > last_time and (time.time() - mtime) > WEIGHT_READ_DELAY:
         interpreter = tf.lite.Interpreter(file_name)
         return interpreter, mtime
     return None, last_time
@@ -97,11 +102,20 @@ def save_model(tflite_model):
 
 if __name__ == '__main__':
     print('hello i started')
-    image = io.imread("/home/ubuntu/purple_tree.jpg")
-    # image.show()
-    write_image(image, {'testing': 'the json', 'of': 123, 'dreams': np.random.rand(10, 30).tolist()})
+    # image = io.imread("/home/ubuntu/embedded-detection/image.png")
+    # write_image(image, {'testing': 'the json', 'of': 123, 'dreams': np.random.rand(10, 30).tolist()})
 
-    # data, last_time = read_new_images(1669250000)
+    # last_time = 0
+    # model = None
+    # while model is None:
+    #     model, last_time = load_model(last_time)
+    #     time.sleep(0.1)
+    # print(model, last_time)
+
+    # data = []
+    # while len(data) == 0:
+    #     data, last_time = read_new_images(1670_139_800)
+    #     time.sleep(0.1)
     # print("Last time:", last_time)
 
     # for (img, label) in data:
