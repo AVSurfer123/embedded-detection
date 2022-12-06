@@ -128,8 +128,8 @@ def display_result(result, frame, labels):
 
 if __name__ == "__main__":
 
-    # model_path = 'data/detect.tflite'
-    model_path = 'test99.tflite'
+    model_path = 'data/detect.tflite'
+    # model_path = 'test99.tflite'
     label_path = 'data/coco_labels.txt'
     image_path = 'data/bus.jpg'
     write_path = 'pred/'
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     #     hub.KerasLayer(classifier_model, input_shape=(320, 320)+(3,))
     # ])
 
-    base_model = hub.KerasLayer("https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1")
+    # base_model = hub.KerasLayer("https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1")
 
     input_details = interpreter.get_input_details()
     # Get Width and Height
