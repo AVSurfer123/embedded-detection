@@ -7,7 +7,11 @@ const LABEL_DIR: &str = "server_labels";
 const WEIGHT_DIR: &str = "server_weights";
 
 fn main(){
-    let listener = TcpListener::bind("127.0.0.1:7887").expect("Couldn't bind to address");
+    std::fs::create_dir_all(IMAGE_DIR).unwrap();
+    std::fs::create_dir_all(LABEL_DIR).unwrap();
+    std::fs::create_dir_all(WEIGHT_DIR).unwrap();
+
+    let listener = TcpListener::bind("0.0.0.0:7887").expect("Couldn't bind to address");
     // accept connections and process them in separate threads
     for stream in listener.incoming() {
         std::thread::spawn(|| handle_client(&mut stream.expect("Invalid TCP connection")));

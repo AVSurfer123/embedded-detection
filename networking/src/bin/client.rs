@@ -8,22 +8,35 @@ const WEIGHT_DIR: &str = "weights";
 
 fn main() {
     let mut init_time: u64 = 0;
+    let mut server_addr: String = String::from("10.28.70.33:7887");
+
     let mut args_iter = std::env::args();
     if args_iter.len() >= 2 {
         args_iter.next();
-        let arg = args_iter.next().unwrap();
-        if arg == "now" {
-            init_time = SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64;
+        let mut arg = args_iter.next().unwrap();
+
+        if arg != "default" {
+            server_addr = format!("{}:7887", arg);
         }
-        else {
-            init_time = arg.parse().unwrap();
+
+        if args_iter.len() >= 1 {
+            arg = args_iter.next().unwrap();
+            if arg == "now" {
+                init_time = SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64;
+            }
+            else {
+                init_time = arg.parse().unwrap();
+            }
         }
     }
+    std::fs::create_dir_all(IMAGE_DIR).unwrap();
+    std::fs::create_dir_all(LABEL_DIR).unwrap();
+    std::fs::create_dir_all(WEIGHT_DIR).unwrap();
 
     loop {
-        let res = TcpStream::connect("127.0.0.1:7887");
+        let res = TcpStream::connect(&server_addr);
         if res.is_err() {
-            println!("Could not connect to server, retrying...");
+            println!("Could not connect to server {server_addr}, retrying...");
             std::thread::sleep(Duration::from_secs(1));
         }
         else {
@@ -83,7 +96,7 @@ fn read_weights(mut stream: TcpStream) {
         weight_buf.resize(weight_size as usize, 0);
         stream.read_exact(&mut weight_buf).unwrap();
 
-        let weight_path = format!("{}/model.h5", WEIGHT_DIR);
+        let weight_path = format!("{}/model.tflite", WEIGHT_DIR);
         std::fs::write(weight_path, weight_buf).unwrap();
         println!("Read new weights");
     }
