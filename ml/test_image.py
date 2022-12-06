@@ -129,7 +129,7 @@ def display_result(result, frame, labels):
 if __name__ == "__main__":
 
     model_path = 'data/detect.tflite'
-    # model_path = 'test99.tflite'
+    # model_path = 'z_test99.tflite'
     label_path = 'data/coco_labels.txt'
     image_path = 'data/bus.jpg'
     write_path = 'pred/'
