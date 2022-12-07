@@ -96,10 +96,15 @@ def main(_):
   image_size = [int(dim) for dim in FLAGS.image_size.split('x')]
   image = load_image(FLAGS.sample_image, image_size)
 
+  image2 = load_image("/home/ashwin/GradWork/CS329E/embedded-detection/networking/server_images/1670136516027.png", image_size)
+  import numpy as np
+  images = np.concatenate([image, image2], axis=0)
+
   runner = TFLiteRunner(FLAGS.tflite_path)
-  prediction = runner.run(image)
+  prediction = runner.run(images)
   print(prediction)
   print(prediction.shape)
+
   save_visualized_image(image[0], prediction[0], FLAGS.output_image)
 
 
