@@ -16,7 +16,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 SERVER_IMAGE_DIR = os.path.join(CURRENT_DIR, "../networking/server_images")
 SERVER_LABEL_DIR = os.path.join(CURRENT_DIR, "../networking/server_labels")
 TFLITE_FILEPATH = os.path.join(CURRENT_DIR, "../networking/server_weights/model.tflite")
-LOOP_TIME = 10
+LOOP_TIME = 0
 
 print("Done loading imports. Launching training loop:")
 
@@ -75,7 +75,7 @@ print("SERVER_IMAGE_DIR: ", SERVER_IMAGE_DIR)
 print("SERVER_LABEL_DIR: ", SERVER_LABEL_DIR)
 
 subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.py",
-                    # "--image_info_file=" + os.path.join(SERVER_LABEL_DIR, "1670422349137.json"),
+#                    "--image_info_file=" + os.path.join(SERVER_LABEL_DIR, "1670422349137.json"),
                     "--image_dir=" + SERVER_IMAGE_DIR,
                     "--object_annotations_file=" + os.path.join(SERVER_LABEL_DIR, "1670422349137.json"),
                     "--output_file_prefix=tfrecord/coco"
