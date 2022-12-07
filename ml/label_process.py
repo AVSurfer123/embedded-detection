@@ -9,6 +9,7 @@ import math
 import os
 import sys
 
+import tensorflow as tf
 import tensorflow.lite as tflite
 # import tflite_runtime.interpreter as tflite
 from statistics import mode
@@ -21,6 +22,8 @@ CAMERA_HEIGHT = 320
 NUM_BATCH = 8
 sys.path.append(os.path.join(os.path.dirname(__file__), "../automl/efficientdet"))
 from run_tflite import TFLiteRunner
+sys.path.append(os.path.join(os.path.dirname(__file__), "../networking"))
+from data_utils import write_image, load_model
 
 def save_visualized_image(image, prediction, old_c_array):
     """Saves the visualized image with prediction.
@@ -139,15 +142,21 @@ class EuclideanDistTracker:
 def distance(p1, p2):
     return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
+def create_JSON(bbox, alt_label):
+    bbox_p_label = [bbox[1], bbox[2], bbox[3], bbox[4], alt_label]
+    return bbox_p_label
+    
+
 
 if __name__ == "__main__":
 
-    #video_path = "vid_data/mov_4.MOV"     # good_example vid = variety_lens_flare.MOV"
-    #cap = cv2.VideoCapture(video_path)
-    
+    video_path = "vid_data/mov_4.MOV"     # good_example vid = variety_lens_flare.MOV"
+    cap = cv2.VideoCapture(video_path)
+    if(cap.isOpened() == False):
+        print("VID DID NOT OPEN")
     c_array = [[] for _ in range(NUM_BATCH)]
     runner = TFLiteRunner("../automl/efficientdet/efficientdet-batch8.tflite")
-    camera_cap = CameraBuffer()   
+    #camera_cap = CameraBuffer()   
     tracker = EuclideanDistTracker()
     object_detector = cv2.createBackgroundSubtractorMOG2(history = 200, varThreshold = 100, detectShadows=False)
 
@@ -157,15 +166,21 @@ if __name__ == "__main__":
     time.sleep(2)
     # Process Stream
     while True:
-        image = camera_cap.get_recent_batch(NUM_BATCH)
+        #image = camera_cap.get_recent_batch(NUM_BATCH)
         #USED FOR DEBUG VIDEO STREAM#
-        '''
-        frame = cv2.resize(frame, (640, 360), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
+        
+        img_arr = []
+        for i in range(0, NUM_BATCH):
+            ret, frame = cap.read()             
+            frame = cv2.resize(frame, (CAMERA_WIDTH, CAMERA_HEIGHT), interpolation=cv2.INTER_LINEAR)
         #ret, frame = cap.read()
         #frame = cv2.resize(frame, (640, 360), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
-        image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        image = image.resize((width, height))
-        '''
+            single_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            single_image = single_image.resize((CAMERA_WIDTH, CAMERA_HEIGHT))
+            img_arr.append(single_image)
+        image = tf.stack([img_arr[0], img_arr[1], img_arr[2], img_arr[3], img_arr[4], img_arr[5], img_arr[6], img_arr[6], img_arr[7]])
+
+       
         #manually batch the test video
 
         prediction = runner.run(image)
@@ -192,16 +207,28 @@ if __name__ == "__main__":
                         cy = (y2-y1)/2 + y1
                         w = x2 - x1
                         h = y2 - y1
-                        if cx == new_c_array[0][0] and cy == new_c_array[0][1]:
+                        if cx == new_c_array[batch_num][0][0] and cy == new_c_array[batch_num][0][1]:
                             ml_labels.append(ml_label)
                             print("ML Label: " + str(ml_label))
                             input("pause until enter pressed:")
                     alt_labels = []
                 #GRAB NEXT BATCH OF IMAGES*****#
-                next_batch_image = camera_cap.getMatchingBuffer(NUM_BATCH) 
+                img_arr = []
+                '''for i in range(0, NUM_BATCH):
+                    ret, frame = cap.read()             
+                    frame = cv2.resize(frame, (CAMERA_WIDTH, CAMERA_HEIGHT), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
+        #ret, frame = cap.read()
+        #frame = cv2.resize(frame, (640, 360), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
+                    single_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                    single_image = image.resize((CAMERA_WIDTH, CAMERA_HEIGHT))
+                    img_arr.append(single_image)
+                next_batch_image = tf.stack([img_arr[0], img_arr[1], img_arr[2], img_arr[3], img_arr[4], img_arr[5], img_arr[6], img_arr[6]])
+'''
+                #next_batch_image = camera_cap.getMatchingBuffer(NUM_BATCH) 
                 for i in range(0,NUM_BATCH): 
-                    #ret, frame = cap.read()
-                    frame = next_batch_image[i]
+                    ret, frame = cap.read()
+                    #frame = next_batch_image[i]
+                    frame = cv2.resize(frame, (CAMERA_WIDTH, CAMERA_HEIGHT), interpolation=cv2.INTER_LINEAR)
                     #frame = images
                     #object detection
                     mask = object_detector.apply(frame)
@@ -237,6 +264,11 @@ if __name__ == "__main__":
                 alt_label = mode(alt_labels)
             
                 if alt_label not in ml_labels:
+                    #return image = image[batch_num]
+		    #prediction[batch_num][0]
+		    return_img = image[batch_num]
+		    return_list = create_JSON(prediction[batch_num][0], alt_label)
+		    write_image(return_img, return_list)
                     print("ML Label: " + str(ml_label) + " ALT Label: " + str(alt_label))
                     print(ml_labels)
                     input("enter")
