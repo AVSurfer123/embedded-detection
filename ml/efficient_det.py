@@ -33,17 +33,25 @@ def gen_tflite():
     model = tf.keras.Model(inputs=input, outputs=x, name="temp_model")
     tf.saved_model.save(model, ".")
 
-    converter = tf.lite.TFLiteConverter.from_keras_model(model)
-    converter.optimizations = [tf.lite.Optimize.DEFAULT]
-    converter.representative_dataset = representative_dataset
-    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-    converter.inference_input_type = tf.int8  # or tf.uint8
-    converter.inference_output_type = tf.int8  # or tf.uint8
-    tflite_model = converter.convert()
+    # converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    # converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    # converter.representative_dataset = representative_dataset
+    # converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    # converter.inference_input_type = tf.int8  # or tf.uint8
+    # converter.inference_output_type = tf.int8  # or tf.uint8
+    # tflite_model = converter.convert()
 
     # Save the model.
     with open('z_model_new.tflite', 'wb') as f:
         f.write(tflite_model)
 
+def from_saved():
+    converter = tf.lite.TFLiteConverter.from_saved_model('z_model_new.tflite')
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    tflite_quant_model = converter.convert()
+
+    with open('z_model_new2.tflite', 'wb') as f:
+        f.write(tflite_quant_model)
+
 if __name__ == "__main__":
-    gen_tflite()
+    from_saved()

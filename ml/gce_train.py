@@ -1,31 +1,49 @@
-# sudo apt -y install libportaudio2
-# pip install -q --use-deprecated=legacy-resolver tflite-model-maker
-# pip install -q pycocotools
-# pip install -q opencv-python-headless==4.1.2.30
-# pip uninstall -y tensorflow && pip install -q tensorflow==2.8.0
+import sys
+sys.path.append('../automl/efficientdet/')
+sys.path.append('../networking/')
 
-import numpy as np
-import os
+# import os
+# import time
+# from typing import Text, Tuple, List
+# from absl import app
+# from absl import flags
+# from absl import logging
+# import numpy as np
+# from PIL import Image
+# import tensorflow.compat.v1 as tf
+# import hparams_config
+# import inference
+# import utils
+# from tensorflow.python.client import timeline
 
-from tflite_model_maker.config import QuantizationConfig
-from tflite_model_maker.config import ExportFormat
-from tflite_model_maker import model_spec
-from tflite_model_maker import object_detector
+from model_inspect import *
+from data_utils import read_new_images, save_model
+import subprocess
+import time
+from datetime import datetime
 
-import tensorflow as tf
-assert tf.__version__.startswith('2')
 
-tf.get_logger().setLevel('ERROR')
-from absl import logging
-logging.set_verbosity(logging.ERROR)
+# print("hello")
+# app.run(main)
 
-spec = model_spec.get('efficientdet_lite0')
-train_data, validation_data, test_data = object_detector.DataLoader.from_csv('gs://cloud-ml-data/img/openimage/csv/salads_ml_use.csv')
-model = object_detector.create(train_data, model_spec=spec, batch_size=8, train_whole_model=True, validation_data=validation_data)
+LOOP_TIME = 5
 
-model.evaluate(test_data)
-model.export(export_dir='.')
-model.evaluate_tflite('model.tflite', test_data)
+print("Done loading imports. Launching training loop:")
 
-# config = QuantizationConfig.for_int8(train_data)
-# model.export(export_dir='.', tflite_filename='model_int8.tflite', quantization_config=config)
+while(True):
+    start_read_time = time.time()
+    time.sleep(LOOP_TIME)
+
+    print("Start Training Loop at " + datetime.now().strftime("%H:%M:%S"))
+    print("Reading data starting at " + datetime.fromtimestamp(start_read_time).strftime('%H:%M:%S'))
+    read_new_images(start_read_time)
+
+    #
+    # model from disk
+    # tf_dataloader
+    # train
+    # store/save model
+    # convert
+    # save_model(latest_tflite_model)
+    print("Sleeping...")
+    break

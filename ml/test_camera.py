@@ -15,7 +15,6 @@ from PIL import Image
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
 
-
 def load_labels(label_path):
     r"""Returns a list of labels"""
     with open(label_path) as f:

@@ -480,10 +480,13 @@ class ModelInspector(object):
 
 
 def main(_):
+  print("A")
   if tf.io.gfile.exists(FLAGS.logdir) and FLAGS.delete_logdir:
     logging.info('Deleting log dir ...')
     tf.io.gfile.rmtree(FLAGS.logdir)
+    print("B")
 
+  print("C")
   inspector = ModelInspector(
       model_name=FLAGS.model_name,
       logdir=FLAGS.logdir,
@@ -498,6 +501,7 @@ def main(_):
       score_thresh=FLAGS.min_score_thresh,
       max_output_size=FLAGS.max_boxes_to_draw,
       nms_method=FLAGS.nms_method)
+  print("D")
   inspector.run_model(
       FLAGS.runmode,
       input_image=FLAGS.input_image,
@@ -511,9 +515,11 @@ def main(_):
       bm_runs=FLAGS.bm_runs,
       threads=FLAGS.threads,
       trace_filename=FLAGS.trace_filename)
+  print("E")
 
 
 if __name__ == '__main__':
+  print("RUNNING MODEL_INSPECT.PY")
   logging.set_verbosity(logging.WARNING)
   tf.enable_v2_tensorshape()
   tf.disable_eager_execution()

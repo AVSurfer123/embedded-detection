@@ -6,7 +6,10 @@ def run_model2(input):
     # See: https://tfhub.dev/tensorflow/collections/object_detection/1
     # See: https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2
     # See: https://github.com/tensorflow/hub/blob/master/examples/colab/tf2_image_retraining.ipynb
+    image = ...  # A batch of preprocessed images with shape [batch_size, height, width, 3].
+    # detector = hub.KerasLayer("https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1")
     detector = hub.load("https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2")
+
     input_sample = input[0, :, :, :][np.newaxis, :, :, :]
     detector_output = detector(input_sample)
     
