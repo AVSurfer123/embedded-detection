@@ -61,11 +61,11 @@ def save_visualized_image(image, prediction, old_c_array):
                     if len(image[image_id]) != 0:
                         cv2.putText(image[image_id].numpy(), str(label_id), (int(x1), int(y1)), font, size, color, thickness)
                         cv2.rectangle(image[image_id].numpy(), (int(x1), int(y1)), (int(x2), int(y2)), color, thickness)
-        if len(image[batch_num]) > 0:
-            cv2.imshow("Object Detect", image[batch_num].numpy())
-        key = cv2.waitKey(1)
-        if key == 27:  # esc
-            break
+        # if len(image[batch_num]) > 0:
+        #     cv2.imshow("Object Detect", image[batch_num].numpy())
+        # key = cv2.waitKey(1)
+        # if key == 27:  # esc
+        #     break
         batch_array.append(new_c_array)
         batch_num = batch_num + 1
     return(batch_array)
@@ -143,14 +143,14 @@ def distance(p1, p2):
     return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
 def create_JSON(bbox, alt_label):
-    bbox_p_label = [bbox[1], bbox[2], bbox[3], bbox[4], alt_label]
+    bbox_p_label = [int(bbox[1]),int( bbox[2]), int(bbox[3]), int(bbox[4]), alt_label]
     return bbox_p_label
     
 
 
 if __name__ == "__main__":
 
-    video_path = "vid_data/mov_4.MOV"     # good_example vid = variety_lens_flare.MOV"
+    video_path = "data/IMG_1702.MOV"     # good_example vid = variety_lens_flare.MOV"
     cap = cv2.VideoCapture(video_path)
     if(cap.isOpened() == False):
         print("VID DID NOT OPEN")
@@ -177,10 +177,8 @@ if __name__ == "__main__":
         #frame = cv2.resize(frame, (640, 360), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
             single_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             single_image = single_image.resize((CAMERA_WIDTH, CAMERA_HEIGHT))
-            img_arr.append(single_image)
-        image = tf.stack([img_arr[0], img_arr[1], img_arr[2], img_arr[3], img_arr[4], img_arr[5], img_arr[6], img_arr[6], img_arr[7]])
-
-       
+            img_arr.append(np.array(single_image))
+        image = tf.convert_to_tensor(img_arr, dtype=tf.uint8)
         #manually batch the test video
 
         prediction = runner.run(image)
@@ -210,7 +208,7 @@ if __name__ == "__main__":
                         if cx == new_c_array[batch_num][0][0] and cy == new_c_array[batch_num][0][1]:
                             ml_labels.append(ml_label)
                             print("ML Label: " + str(ml_label))
-                            input("pause until enter pressed:")
+                            # input("pause until enter pressed:")
                     alt_labels = []
                 #GRAB NEXT BATCH OF IMAGES*****#
                 img_arr = []
@@ -252,28 +250,27 @@ if __name__ == "__main__":
                             cv2.putText(frame, str(alt_label), (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
     
                             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
-                    cv2.imshow("Object Detection", frame)
-                    cv2.imshow("Mask", mask)
-                    key = cv2.waitKey(1)
-                    if key == 27:  # esc
-                        break
+                    # cv2.imshow("Object Detection", frame)
+                    # cv2.imshow("Mask", mask)
+                    # key = cv2.waitKey(1)
+                    # if key == 27:  # esc
+                    #     break
 
 
-                    input("Pause until enter")
+                    # input("Pause until enter")
                 print(alt_labels)
                 alt_label = mode(alt_labels)
             
                 if alt_label not in ml_labels:
                     #return image = image[batch_num]
-		    #prediction[batch_num][0]
-		    return_img = image[batch_num]
-		    return_list = create_JSON(prediction[batch_num][0], alt_label)
-		    write_image(return_img, return_list)
+                    #prediction[batch_num][0]
+                    return_img = image[batch_num]
+                    return_list = create_JSON(prediction[batch_num][0], alt_label)
+                    print(return_list)
+                    write_image(return_img, return_list)
                     print("ML Label: " + str(ml_label) + " ALT Label: " + str(alt_label))
                     print(ml_labels)
-                    input("enter")
+                    # input("enter")
                 else:
                     print("ML Label and Alt Label Match")
-
-
 
