@@ -6,6 +6,8 @@ import re
 import cv2
 import numpy as np
 import math
+import os
+import sys
 
 import tensorflow.lite as tflite
 # import tflite_runtime.interpreter as tflite
@@ -20,13 +22,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../automl/efficientdet"
 from run_tflite import TFLiteRunner
 
 def save_visualized_image(image, prediction, output_path, old_c_array):
-  """Saves the visualized image with prediction.
+    """Saves the visualized image with prediction.
 
-  Args:
-    image: numpy.ndarray of shape [H, W, C].
-    prediction: numpy.ndarray of shape [num_predictions, 7].
-    output_path: str, output image path.
-  """
+    Args:
+        image: numpy.ndarray of shape [H, W, C].
+        prediction: numpy.ndarray of shape [num_predictions, 7].
+        output_path: str, output image path.
+    """
   #[image_id, ymin, xmin, ymax, xmax, score, class]
 
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -203,8 +205,8 @@ if __name__ == "__main__":
         input("pause")
         for batch_num in range(0, NUM_BATCH):
             if len(new_c_array[batch_num]) == 1:
-    	    #If the ML model only detects one, object, begin tracking that object with alternative labeling
-    	    #display_result(top_result, frame, labels)
+            #If the ML model only detects one, object, begin tracking that object with alternative labeling
+            #display_result(top_result, frame, labels)
              #roi = frame[0: height, 0: width]
                 ml_labels = []
                 for result in prediction[batch_num]:
