@@ -39,7 +39,7 @@ import PIL.Image
 
 from pycocotools import mask
 import tensorflow as tf
-<<<<<<< HEAD
+
 # from dataset import label_map_util
 # from dataset import tfrecord_util
 
