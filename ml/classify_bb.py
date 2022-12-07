@@ -6,12 +6,12 @@
 #speed characteristics come in list of [lower_bound, upper_bound]
 #speed ~= m/s
 label_keys = {
-    0 : 1, #bike
-    1 : 0, #ped
-    2 : 40,#skate/scooter  #skateboard label, needs to learn scooters
-    3 : 2, #car
-    4 : 2, #golfcart #92 for new label or 3 for car
-    5:  5  #bus
+    0 : 2, #bike
+    1 : 1, #ped
+    2 : 41,#skate/scooter  #skateboard label, needs to learn scooters
+    3 : 3, #car
+    4 : 3, #golfcart #92 for new label or 3 for car
+    5:  6  #bus
 
 }
 speed_chars = {
