@@ -6,13 +6,15 @@ import time
 import json
 from typing import List, Tuple, Any, Optional
 
-IMAGE_DIR = "images"
-LABEL_DIR = "labels"
-WEIGHT_DIR = "weights"
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-SERVER_IMAGE_DIR = "server_images"
-SERVER_LABEL_DIR = "server_labels"
-SERVER_WEIGHT_DIR = "server_weights"
+IMAGE_DIR = os.path.join(CURRENT_DIR, "images")
+LABEL_DIR = os.path.join(CURRENT_DIR, "labels")
+WEIGHT_DIR = os.path.join(CURRENT_DIR, "weights")
+
+SERVER_IMAGE_DIR = os.path.join(CURRENT_DIR, "server_images")
+SERVER_LABEL_DIR = os.path.join(CURRENT_DIR, "server_labels")
+SERVER_WEIGHT_DIR = os.path.join(CURRENT_DIR, "server_weights")
 
 IMAGE_READ_DELAY = 1.0
 WEIGHT_READ_DELAY = 1.0
