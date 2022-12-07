@@ -22,7 +22,7 @@ NUM_BATCH = 8
 sys.path.append(os.path.join(os.path.dirname(__file__), "../automl/efficientdet"))
 from run_tflite import TFLiteRunner
 
-def save_visualized_image(image, prediction, output_path, old_c_array):
+def save_visualized_image(image, prediction, old_c_array):
     """Saves the visualized image with prediction.
 
     Args:
@@ -42,10 +42,10 @@ def save_visualized_image(image, prediction, output_path, old_c_array):
         new_c_array = []
         for result in batch:
             if result[5] > .3:
-                image_id = result[0]
+                image_id = int(result[0])
                 y1 = result[1]
                 x1 = result[2]
-                y1 = result[3]
+                y2 = result[3]
                 x2 = result[4]
                 score = result[5]
                 label_id = result[6]
@@ -53,11 +53,13 @@ def save_visualized_image(image, prediction, output_path, old_c_array):
                 cy = (y2-y1)/2 + y1
                 w = x2 - x1
                 h = y2 - y1
-                if (old_c_array[batch_num].count(cx, cy)) == 0 and (h > 60 or w > 80):
-                    new_c_array.append(cx, cy)
-                    cv2.putText(image[image_id], label_id, (x1, y1), font, size, color, thickness)
-                    cv2.rectangle(image[image_id], (x1, y1), (x2, y2), color, thickness)
-        cv2.imshow("Object Detect", image[batch_num])
+                if (old_c_array[batch_num].count((cx, cy))) == 0 and (h > 60 or w > 80):
+                    new_c_array.append((cx, cy))
+                    if len(image[image_id]) != 0:
+                        cv2.putText(image[image_id].numpy(), str(label_id), (int(x1), int(y1)), font, size, color, thickness)
+                        cv2.rectangle(image[image_id].numpy(), (int(x1), int(y1)), (int(x2), int(y2)), color, thickness)
+        if len(image[batch_num]) > 0:
+            cv2.imshow("Object Detect", image[batch_num].numpy())
         key = cv2.waitKey(1)
         if key == 27:  # esc
             break
@@ -93,7 +95,6 @@ class EuclideanDistTracker:
 
                 if dist < 25:
                     self.center_points[id] = (cx, cy)
-                    #print(self.center_points)
                     objects_bbs_ids.append([x, y, w, h, id])
                     same_object_detected = True
                     break
@@ -144,17 +145,19 @@ if __name__ == "__main__":
     #video_path = "vid_data/mov_4.MOV"     # good_example vid = variety_lens_flare.MOV"
     #cap = cv2.VideoCapture(video_path)
     
-    c_array = []
-    runner = TFLiteRunner("../automl/efficientdet/efficientdet-lite0.tflite")
+    c_array = [[] for _ in range(NUM_BATCH)]
+    runner = TFLiteRunner("../automl/efficientdet/efficientdet-batch8.tflite")
     camera_cap = CameraBuffer()   
     tracker = EuclideanDistTracker()
     object_detector = cv2.createBackgroundSubtractorMOG2(history = 200, varThreshold = 100, detectShadows=False)
 
 
     print("Beginning processing")
+    import time
+    time.sleep(2)
     # Process Stream
     while True:
-        image = camera_cap.get_recent_batch()
+        image = camera_cap.get_recent_batch(NUM_BATCH)
         #USED FOR DEBUG VIDEO STREAM#
         '''
         frame = cv2.resize(frame, (640, 360), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
@@ -165,12 +168,11 @@ if __name__ == "__main__":
         '''
         #manually batch the test video
 
-
         prediction = runner.run(image)
         new_c_array = save_visualized_image(image, prediction, c_array)
         
         c_array = new_c_array
-        input("pause")
+        # input("pause")
         for batch_num in range(0, NUM_BATCH):
             if len(new_c_array[batch_num]) == 1:
             #If the ML model only detects one, object, begin tracking that object with alternative labeling
@@ -182,7 +184,7 @@ if __name__ == "__main__":
                         image_id = result[0]
                         y1 = result[1]
                         x1 = result[2]
-                        y1 = result[3]
+                        y2 = result[3]
                         x2 = result[4]
                         score = result[5]
                         ml_label = result[6]
@@ -242,6 +244,4 @@ if __name__ == "__main__":
                     print("ML Label and Alt Label Match")
 
 
-            
-            cap.release()
-    cv2.destroyAllWindows()
+

@@ -49,6 +49,9 @@ class CameraBuffer:
 
     def get_recent_batch(self, batch_size=8):
         self.buffer_lock.acquire()
+        if len(self.image_buffer) < batch_size:
+            self.buffer_lock.release()
+            return
         batch = tf.stack(self.image_buffer[-batch_size:])
         self.batch_idx = len(self.image_buffer)
         self.buffer_lock.release()
@@ -65,11 +68,12 @@ class CameraBuffer:
 
 
 if __name__ == '__main__':
-    c = CameraBuffer(400)
-    time.sleep(10)
-    print(len(c.image_buffer))
+    c = CameraBuffer(200)
+    while True:
+        print(len(c.image_buffer))
+        time.sleep(.05)
     batch = c.get_recent_batch()
-    print(batch.shape)
+    print(batch.shape, batch.dtype)
     for b in batch:
-        print(b.shape, b.dtype)
-    time.sleep(100)
+        print(b.shape, b.dtype)        
+    time.sleep(10)
