@@ -91,6 +91,7 @@ def display_result(result, frame, labels, old_c_array):
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness)
 
     cv2.imshow('Object Detection', frame)
+
     return new_c_array
 
 
@@ -103,7 +104,6 @@ class EuclideanDistTracker:
         # Keep the count of the IDs
         # each time a new object id detected, the count will increase by one
         self.id_count = 0
-
 
     def update(self, objects_rect):
         # Objects boxes and ids
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
     model_path = 'data/detect.tflite'
     label_path = 'data/coco_labels.txt'
-    video_path = "data/1_skateboard.MOV"     #good_example vid = variety_lens_flare.MOV"
+    video_path = "data/1_skateboard.MOV"     # good_example vid = variety_lens_flare.MOV"
     cap = cv2.VideoCapture(video_path)
     
     #cap = cv2.VideoCapture(0)
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 	    #display_result(top_result, frame, labels)
             #roi = frame[0: height, 0: width]
             ml_labels = []
-            for obj in top_result: 
+            for obj in top_result:
                 pos = obj['pos']
                 x1 = int(pos[1] * CAMERA_WIDTH)
                 x2 = int(pos[3] * CAMERA_WIDTH)
@@ -262,8 +262,7 @@ if __name__ == "__main__":
             print(alt_labels)
             alt_label = mode(alt_labels)
             
-
-            if alt_label not in  ml_labels:
+            if alt_label not in ml_labels:
                 print("ML Label: " + str(ml_label) + " ALT Label: " + str(alt_label))
                 print(ml_labels)
                 input("enter")

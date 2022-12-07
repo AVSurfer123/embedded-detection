@@ -1,135 +1,81 @@
-import argparse
-import sys
-import time
+import numpy as np
 
-import cv2
-from tflite_support.task import processor
-from tflite_support.task import vision
-from tflite_support.task import core
-import utils
+import PIL.Image as Image
+import matplotlib.pylab as plt
 
+import tensorflow as tf
+import tensorflow_hub as hub
+import tensorflow.lite as tflite
 
-def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
-        enable_edgetpu: bool) -> None:
-  """Continuously run inference on images acquired from the camera.
-  Args:
-    model: Name of the TFLite object detection model.
-    camera_id: The camera id to be passed to OpenCV.
-    width: The width of the frame captured from the camera.
-    height: The height of the frame captured from the camera.
-    num_threads: The number of CPU threads to run the model.
-    enable_edgetpu: True/False whether the model is a EdgeTPU model.
-  """
+# # Works, but fp32 and needs different dataset to do int quantization
+# m = tf.keras.Sequential([
+#     hub.KerasLayer("https://tfhub.dev/google/imagenet/efficientnet_v2_imagenet1k_b0/feature_vector/2",
+#                    trainable=True),  # Can be True, see below.
+#     tf.keras.layers.Dense(91, activation='softmax')
+# ])
 
-  # Variables to calculate FPS
-  counter, fps = 0, 0
-  start_time = time.time()
+IMAGE_SHAPE = (224, 224, 3)
+m = tf.keras.Sequential([hub.KerasLayer("https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1"),
+tf.keras.layers.Dense(91, activation='softmax')])
 
-  # Start capturing video input from the camera
-  cap = cv2.VideoCapture(camera_id)
-  cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-  cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+m.build([None, 320, 320, 3])
+# # inputs = tf.keras.layers.Input(shape=(320, 320, 3))
+# # base = hub.KerasLayer("https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1")
 
-  # Visualization parameters
-  row_size = 20  # pixels
-  left_margin = 24  # pixels
-  text_color = (0, 0, 255)  # red
-  font_size = 1
-  font_thickness = 1
-  fps_avg_frame_count = 10
+# # m2 = tf.keras.Sequential([base])
+# # m2.build([None, 320, 320, 3])
 
-  # Initialize the object detection model
-  base_options = core.BaseOptions(
-      file_name=model, use_coral=enable_edgetpu, num_threads=num_threads)
-  detection_options = processor.DetectionOptions(
-      max_results=3, score_threshold=0.3)
-  options = vision.ObjectDetectorOptions(
-      base_options=base_options, detection_options=detection_options)
-  detector = vision.ObjectDetector.create_from_options(options)
+# cls = tf.keras.layers.Dense(91, name="class")(m2.output)
+# # bb = tf.keras.layers.Dense(91, name="bb")(base.output)
 
-  # Continuously capture images from the camera and run inference
-  while cap.isOpened():
-    success, image = cap.read()
-    if not success:
-      sys.exit(
-          'ERROR: Unable to read from webcam. Please verify your webcam settings.'
-      )
+# # m = tf.keras.Sequential([base, [p1, d1]])
+# m = tf.Model(base.input, outputs=[cls, bb])
 
-    counter += 1
-    image = cv2.flip(image, 1)
+# grace_hopper = tf.keras.utils.get_file('image.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/grace_hopper.jpg')
+# grace_hopper = Image.open(grace_hopper).resize(IMAGE_SHAPE)
+# grace_hopper = np.array(grace_hopper)/255.0
+# result = m.predict(grace_hopper[np.newaxis, ...])
+# print(result)
 
-    # Convert the image from BGR to RGB as required by the TFLite model.
-    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+# # m.build([None, 320, 320, 3])  # Batch input shape.
+# # m.summary()
 
-    # Create a TensorImage object from the RGB image.
-    input_tensor = vision.TensorImage.create_from_array(rgb_image)
-
-    # Run object detection estimation using the model.
-    detection_result = detector.detect(input_tensor)
-
-    # Draw keypoints and edges on input image
-    image = utils.visualize(image, detection_result)
-
-    # Calculate the FPS
-    if counter % fps_avg_frame_count == 0:
-      end_time = time.time()
-      fps = fps_avg_frame_count / (end_time - start_time)
-      start_time = time.time()
-
-    # Show the FPS
-    fps_text = 'FPS = {:.1f}'.format(fps)
-    text_location = (left_margin, row_size)
-    cv2.putText(image, fps_text, text_location, cv2.FONT_HERSHEY_PLAIN,
-                font_size, text_color, font_thickness)
-
-    # Stop the program if the ESC key is pressed.
-    if cv2.waitKey(1) == 27:
-      break
-    cv2.imshow('object_detector', image)
-
-  cap.release()
-  cv2.destroyAllWindows()
+##################################################################################
 
 
-def main():
-  parser = argparse.ArgumentParser(
-      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument(
-      '--model',
-      help='Path of the object detection model.',
-      required=False,
-      default='model_ssd_mobilenet_v2_100_int8.tflite')
-  parser.add_argument(
-      '--cameraId', help='Id of camera.', required=False, type=int, default=0)
-  parser.add_argument(
-      '--frameWidth',
-      help='Width of frame to capture from camera.',
-      required=False,
-      type=int,
-      default=640)
-  parser.add_argument(
-      '--frameHeight',
-      help='Height of frame to capture from camera.',
-      required=False,
-      type=int,
-      default=480)
-  parser.add_argument(
-      '--numThreads',
-      help='Number of CPU threads to run the model.',
-      required=False,
-      type=int,
-      default=4)
-  parser.add_argument(
-      '--enableEdgeTPU',
-      help='Whether to run the model on EdgeTPU.',
-      action='store_true',
-      required=False,
-      default=False)
-  args = parser.parse_args()
+base_model = tf.keras.applications.efficientnet.EfficientNetB0(input_shape = IMAGE_SHAPE, include_top=True, weights='imagenet')
+base_model.trainable = False
+base_model.summary()
 
-  run(args.model, int(args.cameraId), args.frameWidth, args.frameHeight,
-      int(args.numThreads), bool(args.enableEdgeTPU))
+converter = tflite.TFLiteConverter.from_keras_model(base_model)
 
 
-if __name__ == '__main__':
-  main()
+
+##################################################################################
+
+# # Everything below "works" except for 'representative_dataset'
+# # Save model 
+# tf.saved_model.save(m, 'model_test_save')
+
+# # def representative_dataset():
+# #   for input_value in tf.data.Dataset.from_tensor_slices(train_images).batch(1).take(100):
+# #     yield [input_value]
+
+# # Convert to tflite
+# converter = tflite.TFLiteConverter.from_keras_model(m)
+# converter.optimizations = [tf.lite.Optimize.DEFAULT]
+# # converter.representative_dataset = representative_dataset
+# # converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+# # converter.inference_input_type = tf.int8  # or tf.uint8
+# # converter.inference_output_type = tf.int8  # or tf.uint8
+
+# tflite_model = converter.convert()
+
+# model_path = 'test99.tflite'
+# with open(model_path, 'wb') as f:
+#     f.write(tflite_model)
+# f.close()
+
+# # # Load TFLite model using interpreter and allocate tensors.
+# # interpreter = tflite.Interpreter(model_path=model_path)
+# # interpreter.allocate_tensors()
