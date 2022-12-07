@@ -19,7 +19,7 @@ SERVER_WEIGHT_DIR = os.path.join(CURRENT_DIR, "server_weights")
 IMAGE_READ_DELAY = 1.0
 WEIGHT_READ_DELAY = 1.0
 
-def read_new_images(last_time: float) -> Tuple[List[Tuple[np.ndarray, Any]], float]:
+def read_new_images(last_time: float, SERVER_IMAGE_DIR: str = SERVER_IMAGE_DIR, SERVER_LABEL_DIR: str = SERVER_LABEL_DIR) -> Tuple[List[Tuple[np.ndarray, Any]], float]:
     """
     Server method: Reads new images and labels from disk which have been sent by edge clients.
 
@@ -103,7 +103,8 @@ def save_model(tflite_model):
 
 
 if __name__ == '__main__':
-    print('hello i started')
+    print('hello I started')
+    print("DIR:", CURRENT_DIR)
     # image = io.imread("/home/ubuntu/embedded-detection/image.png")
     # write_image(image, {'testing': 'the json', 'of': 123, 'dreams': np.random.rand(10, 30).tolist()})
 

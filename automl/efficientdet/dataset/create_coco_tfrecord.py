@@ -360,4 +360,7 @@ def main(_):
 
 
 if __name__ == '__main__':
+  print("HIYA")
   app.run(main)
+
+print("COCO HERE!")

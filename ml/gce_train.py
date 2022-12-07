@@ -1,49 +1,129 @@
+import os
 import sys
-sys.path.append('../automl/efficientdet/')
-sys.path.append('../networking/')
-
-# import os
-# import time
-# from typing import Text, Tuple, List
-# from absl import app
-# from absl import flags
-# from absl import logging
-# import numpy as np
-# from PIL import Image
-# import tensorflow.compat.v1 as tf
-# import hparams_config
-# import inference
-# import utils
-# from tensorflow.python.client import timeline
-
-from model_inspect import *
-from data_utils import read_new_images, save_model
 import subprocess
 import time
 from datetime import datetime
+import numpy as np
+import tensorflow as tf
 
+# sys.path.append('../automl/efficientdet/')
+sys.path.append('../networking/')
 
-# print("hello")
-# app.run(main)
+# from model_inspect import *
+from data_utils import read_new_images, save_model
 
-LOOP_TIME = 5
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_IMAGE_DIR = os.path.join(CURRENT_DIR, "../networking/server_images")
+SERVER_LABEL_DIR = os.path.join(CURRENT_DIR, "../networking/server_labels")
+TFLITE_FILEPATH = os.path.join(CURRENT_DIR, "../networking/server_weights/model.tflite")
+LOOP_TIME = 10
 
 print("Done loading imports. Launching training loop:")
 
-while(True):
-    start_read_time = time.time()
-    time.sleep(LOOP_TIME)
+start_read_time = time.time()
+# while(True):
 
-    print("Start Training Loop at " + datetime.now().strftime("%H:%M:%S"))
-    print("Reading data starting at " + datetime.fromtimestamp(start_read_time).strftime('%H:%M:%S'))
-    read_new_images(start_read_time)
+time.sleep(LOOP_TIME)
+loop_start = datetime.now()
+print("(1) Start Training Loop at: " + loop_start.strftime("%H:%M:%S"))
 
-    #
-    # model from disk
-    # tf_dataloader
-    # train
-    # store/save model
-    # convert
-    # save_model(latest_tflite_model)
-    print("Sleeping...")
-    break
+# Read data from disk ###################################################################
+# print("(2) Read data w/ `read_new_images()` starting at: " \
+#         + datetime.fromtimestamp(start_read_time).strftime('%H:%M:%S'))
+# data, start_read_time = read_new_images(start_read_time, SERVER_IMAGE_DIR, SERVER_LABEL_DIR)
+
+# print(len(data))
+# print(data)
+# data = [(np.array([5, 5, 3]), 2), (np.array([15, 15, 3]), 4), (np.array([25, 25, 3]), 6)]
+
+# # Load Dataset ##########################################################################
+# print("(3) Preproces and Load data")
+
+# processed_data = list(zip(*data))
+# print(processed_data)
+# # images = tf.convert_to_tensor(processed_data[0])
+# # annot = tf.convert_to_tensor(processed_data[1])
+# images = processed_data[0]
+# annot = processed_data[1]
+# print(images, annot)
+
+# # write images into tmp_data/images
+# extension = '.png'
+# for i in range(len(images)):
+#     with open('tmp_data/images/' + str(i) + extension, 'w+') as f:
+#         f.write(images[i])
+#     f.close()
+
+# # write annot.json into tmp_data/annot
+# for i in range(len(annot)):
+#     with open('tmp_data/annot/' + str(i) + extension, 'w+') as f:
+#         f.write(annot[i])
+#     f.close()
+
+
+# subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.py",
+#                     "--image_dir=tmp_data/images",
+
+#                     "--image_info_file=tmp_data/annot",
+#                     "--object_annotations_file=tmp_data/annot",
+                    
+#                     "--output_file_prefix=tfrecord/coco"
+#                 ])
+
+
+subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.py",
+                    "--image_dir=server_images",
+                    "--object_annotations_file=server_labels",
+                    "--output_file_prefix=tfrecord/coco"
+                ])
+
+# # Train, Save model chkpt ###############################################################
+# print("(4) Run training from chkpt...")
+# # train_file_pattern = glob-style path to training data, e.g. "fonts/*.csv"
+# # val_file_pattern = glob-style path to val data, e.g. "fonts/*.csv"
+
+# # train_input_fn = dataloader.InputReader(
+# #   FLAGS.train_file_pattern,
+# #   is_training=True,
+# #   use_fake_data=FLAGS.use_fake_data,
+# #   max_instances_per_image=max_instances_per_image)
+
+# # eval_input_fn = dataloader.InputReader(
+# #     FLAGS.val_file_pattern,
+# #     is_training=False,
+# #     use_fake_data=FLAGS.use_fake_data,
+# #     max_instances_per_image=max_instances_per_image)
+
+# FILE_PATTERN = "tfrecord/*.tfrecord"
+# # FILE_PATTERN = os.path.join(SERVER_IMAGE_DIR, "/*.txt")
+
+# subprocess.run(["python", "../automl/efficientdet/main.py",
+#                     "--mode=train_and_eval",
+#                     "--train_file_pattern=" + FILE_PATTERN,
+#                     "--val_file_pattern=" + FILE_PATTERN,
+#                     "--model_name=efficientdet-d0",
+#                     "--model_dir=/tmp/efficientdet-d0-finetune",
+#                     "--ckpt=efficientdet-d0",
+#                     "--train_batch_size=64",
+#                     "--eval_batch_size=64",
+#                     "--num_examples_per_epoch=5000",
+#                     "--num_epochs=50",
+#                     "--hparams=voc_config.yaml",
+#                     "--val_json_file=tfrecord/json_pascal.json"
+#                 ])
+
+# # Convert Model to .tflite and save #####################################################
+# print("(5) Convert model to .tflite...")
+
+# subprocess.run(["python", "../automl/efficientdet/model_inspect.py",
+#                     "--runmode=saved_model",
+#                     "--model_name=efficientdet-batch8",
+#                     "--ckpt_path=../automl/efficientdet/efficientdet-batch8",
+#                     "--saved_model_dir=batch8_savedmodeldir",
+#                     "--tflite_path=" + TFLITE_FILEPATH,
+#                     "--batch_size=8"
+#                 ])
+
+# loop_end = datetime.now()
+# print("Training loop took ", loop_end - loop_start)
+# print("Sleeping...")
