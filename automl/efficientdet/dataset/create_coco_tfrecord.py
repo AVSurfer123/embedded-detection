@@ -39,8 +39,10 @@ import PIL.Image
 
 from pycocotools import mask
 import tensorflow as tf
-from dataset import label_map_util
-from dataset import tfrecord_util
+# from dataset import label_map_util
+# from dataset import tfrecord_util
+from label_map_util import *
+from tfrecord_util import *
 
 flags.DEFINE_boolean(
     'include_masks', False, 'Whether to include instance segmentations masks '
@@ -252,6 +254,7 @@ def _load_caption_annotations(caption_annotations_file):
 
 
 def _load_images_info(image_info_file):
+  print("image file: ", image_info_file)
   with tf.io.gfile.GFile(image_info_file, 'r') as fid:
     info_dict = json.load(fid)
   return info_dict['images']

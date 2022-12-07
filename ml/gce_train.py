@@ -16,7 +16,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 SERVER_IMAGE_DIR = os.path.join(CURRENT_DIR, "../networking/server_images")
 SERVER_LABEL_DIR = os.path.join(CURRENT_DIR, "../networking/server_labels")
 TFLITE_FILEPATH = os.path.join(CURRENT_DIR, "../networking/server_weights/model.tflite")
-LOOP_TIME = 10
+LOOP_TIME = 0
 
 print("Done loading imports. Launching training loop:")
 
