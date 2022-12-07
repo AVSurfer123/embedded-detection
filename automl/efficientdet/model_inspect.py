@@ -119,6 +119,8 @@ class ModelInspector(object):
     else:
       self.inputs_shape = [batch_size, height, width, 3]
 
+    print("\n\nInput shape:", self.inputs_shape)
+
     self.model_config = model_config
 
   def build_model(self, inputs: tf.Tensor) -> List[tf.Tensor]:
@@ -173,7 +175,7 @@ class ModelInspector(object):
       images = [Image.open(f) for f in batch_files]
       if len(set([m.size for m in images])) > 1:
         # Resize only if images in the same batch have different sizes.
-        images = [m.resize(height, width) for m in images]
+        images = [m.resize((width, height)) for m in images]
       raw_images = [np.array(m) for m in images]
       size_before_pad = len(raw_images)
       if size_before_pad < batch_size:

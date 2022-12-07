@@ -618,7 +618,7 @@ class ServingDriver(object):
     if tflite_path:
       height, width = utils.parse_image_size(self.params['image_size'])
       input_name = signitures['image_arrays'].op.name
-      input_shapes = {input_name: [None, height, width, 3]}
+      input_shapes = {input_name: [self.batch_size, height, width, 3]}
       converter = tf.lite.TFLiteConverter.from_saved_model(
           output_dir,
           input_arrays=[input_name],
