@@ -75,7 +75,7 @@ print("SERVER_IMAGE_DIR: ", SERVER_IMAGE_DIR)
 print("SERVER_LABEL_DIR: ", SERVER_LABEL_DIR)
 
 subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.py",
-                    "--image_info_file=server_labels/1670422349137.json",
+                    "--image_info_file=" + os.path.join(SERVER_LABEL_DIR, "1670422349137.json"),
                     "--image_dir=" + SERVER_IMAGE_DIR,
                     "--object_annotations_file=" + SERVER_LABEL_DIR,
                     "--output_file_prefix=tfrecord/coco"
