@@ -1,7 +1,29 @@
-[
-  103,
-  278,
-  205,
-  318,
-  2
-]
+{
+  "info": {
+    "description": "Fine-Tuning Data",
+    "url": "http://google.com",
+    "version": "1.0",
+    "year": 2022,
+    "contributor": "CS329E",
+    "date_created": "2022/12/07"
+  },
+  "licenses": [{}],
+  "images": [
+    {
+      "license": 0,
+      "file_name": "1670422349137.jpg",
+      "height": 320,
+      "width": 320,
+      "date_captured": "2022-12-07 06:02:02",
+      "id": 0
+  }],
+  "annotations": [
+    {
+      "area": 102400,
+      "iscrowd": 0,
+      "image_id": 0,
+      "bbox": [103, 278, 205, 318],
+      "category_id": 2,
+      "id": 0
+    }]
+}
