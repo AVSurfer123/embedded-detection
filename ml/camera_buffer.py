@@ -26,34 +26,38 @@ class CameraBuffer:
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, IMAGE_SIZE[0])
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, IMAGE_SIZE[1])
         cap.set(cv2.CAP_PROP_FPS, 30)
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                print("Camera failed to read")
-                break
+        try:
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    print("Camera failed to read")
+                    break
 
-            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            self.buffer_lock.acquire()
-            if len(self.image_buffer) >= self.MAX_BUFFER_LEN:
-                self.image_buffer.pop(0)
-                self.batch_idx -= 1
-            self.image_buffer.append(image_preprocess(image, IMAGE_SIZE, 0, 1))
-            self.buffer_lock.release()
+                self.buffer_lock.acquire()
+                if len(self.image_buffer) >= self.MAX_BUFFER_LEN:
+                    self.image_buffer.pop(0)
+                    self.batch_idx -= 1
+                self.image_buffer.append(image_preprocess(image, IMAGE_SIZE, 0, 1))
+                self.buffer_lock.release()
+        except Exception as e:
+            print(e)
+            cap.release()
 
     def get_recent_batch(self, batch_size=8):
         self.buffer_lock.acquire()
         batch = tf.stack(self.image_buffer[-batch_size:])
-        self.batch_idx = len(self._image_buffer)
+        self.batch_idx = len(self.image_buffer)
         self.buffer_lock.release()
         return batch
 
-    def get_matching_buffer(self):
+    def get_matching_buffer(self, batch_size=8):
         self.buffer_lock.acquire()
         if self.batch_idx <= 0:
             print("ERROR: Trying to retrieve matching buffer for a batch that has gone completely from the buffer")
         else:
-            history = np.stack(self.image_buffer[:self.batch_idx])
+            stream = np.stack(self.image_buffer[self.batch_idx:self.batch_idx + batch_size])
         self.buffer_lock.release()
-        return history
+        return stream
 

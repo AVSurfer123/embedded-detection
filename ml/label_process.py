@@ -14,6 +14,7 @@ import tensorflow.lite as tflite
 from statistics import mode
 from PIL import Image
 from classify_bb import *
+from camera_buffer import CameraBuffer
 
 CAMERA_WIDTH = 320
 CAMERA_HEIGHT = 320
@@ -52,7 +53,7 @@ def save_visualized_image(image, prediction, output_path, old_c_array):
                 cy = (y2-y1)/2 + y1
                 w = x2 - x1
                 h = y2 - y1
-                if old_c_array[batch_num].count(cx, cy)) == 0 and (h > 60 or w > 80):
+                if (old_c_array[batch_num].count(cx, cy)) == 0 and (h > 60 or w > 80):
                     new_c_array.append(cx, cy)
                     cv2.putText(image[image_id], label_id, (x1, y1), font, size, color, thickness)
                     cv2.rectangle(image[image_id], (x1, y1), (x2, y2), color, thickness)
@@ -64,36 +65,6 @@ def save_visualized_image(image, prediction, output_path, old_c_array):
         batch_num = batch_num + 1
     return(batch_array)
             
-
-'''
-class TFLiteRunner:
-  """Wrapper to run TFLite model."""
-
-  def __init__(self, model_path):
-    """Init.
-
-    Args:
-      model_path: str, path to tflite model.
-    """
-    self.interpreter = tf.lite.Interpreter(model_path=model_path)
-    self.interpreter.allocate_tensors()
-    self.input_index = self.interpreter.get_input_details()[0]['index']
-    self.output_index = self.interpreter.get_output_details()[0]['index']
-
-  def run(self, image):
-    """Run inference on a single images.
-
-    Args:
-      image: numpy.ndarray of shape [1, H, W, C].
-
-    Returns:
-      prediction: numpy.ndarray of shape [1, num_detections, 7].
-    """
-    self.interpreter.set_tensor(self.input_index, image)
-    self.interpreter.invoke()
-    return self.interpreter.get_tensor(self.output_index)
-'''
-
 
 class EuclideanDistTracker:
     def __init__(self):
@@ -170,17 +141,12 @@ def distance(p1, p2):
 
 if __name__ == "__main__":
 
-    video_path = "vid_data/mov_4.MOV"     # good_example vid = variety_lens_flare.MOV"
-    cap = cv2.VideoCapture(video_path)
+    #video_path = "vid_data/mov_4.MOV"     # good_example vid = variety_lens_flare.MOV"
+    #cap = cv2.VideoCapture(video_path)
     
-    #cap = cv2.VideoCapture(0)
-    #cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
-    #cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
-    #cap.set(cv2.CAP_PROP_FPS, 30)
-
     c_array = []
-    runner = TFLiteRunner("../automl/efficeintdet/efficientdet-lite0.tflite")
-      
+    runner = TFLiteRunner("../automl/efficientdet/efficientdet-lite0.tflite")
+    camera_cap = CameraBuffer()   
     tracker = EuclideanDistTracker()
     object_detector = cv2.createBackgroundSubtractorMOG2(history = 200, varThreshold = 100, detectShadows=False)
 
@@ -188,13 +154,15 @@ if __name__ == "__main__":
     print("Beginning processing")
     # Process Stream
     while True:
-        ret, frame = cap.read()
+        image = camera_cap.get_recent_batch()
+        #USED FOR DEBUG VIDEO STREAM#
+        '''
         frame = cv2.resize(frame, (640, 360), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
         #ret, frame = cap.read()
         #frame = cv2.resize(frame, (640, 360), fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
         image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         image = image.resize((width, height))
-
+        '''
         #manually batch the test video
 
 
@@ -228,8 +196,10 @@ if __name__ == "__main__":
                             input("pause until enter pressed:")
                     alt_labels = []
                 #GRAB NEXT BATCH OF IMAGES*****#
-                for i in range(0,NUM_BATCH):
-                    ret, frame = cap.read()
+                next_batch_image = camera_cap.getMatchingBuffer(NUM_BATCH) 
+                for i in range(0,NUM_BATCH): 
+                    #ret, frame = cap.read()
+                    frame = next_batch_image[i]
                     #frame = images
                     #object detection
                     mask = object_detector.apply(frame)
@@ -272,6 +242,6 @@ if __name__ == "__main__":
                     print("ML Label and Alt Label Match")
 
 
-
+            
             cap.release()
     cv2.destroyAllWindows()
