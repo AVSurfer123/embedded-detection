@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 import tensorflow as tf
 
-# sys.path.append('../automl/efficientdet/')
+sys.path.append('../automl/efficientdet/dataset')
 sys.path.append('../networking/')
 
 # from model_inspect import *
@@ -72,8 +72,9 @@ print("(1) Start Training Loop at: " + loop_start.strftime("%H:%M:%S"))
 
 
 subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.py",
-                    "--image_dir=server_images",
-                    "--object_annotations_file=server_labels",
+                    "--image_info_file=server_labels/1670422349137.json",
+                    "--image_dir=" + SERVER_IMAGE_DIR,
+                    "--object_annotations_file=" + SERVER_LABEL_DIR,
                     "--output_file_prefix=tfrecord/coco"
                 ])
 
