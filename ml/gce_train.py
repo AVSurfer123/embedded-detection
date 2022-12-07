@@ -27,5 +27,5 @@ model.evaluate(test_data)
 model.export(export_dir='.')
 model.evaluate_tflite('model.tflite', test_data)
 
-config = QuantizationConfig.for_int8(train_data)
-model.export(export_dir='.', tflite_filename='model_int8.tflite', quantization_config=config)
+# config = QuantizationConfig.for_int8(train_data)
+# model.export(export_dir='.', tflite_filename='model_int8.tflite', quantization_config=config)

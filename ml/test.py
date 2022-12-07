@@ -15,6 +15,10 @@ import tensorflow.lite as tflite
 # ])
 
 IMAGE_SHAPE = (224, 224, 3)
+m = tf.keras.Sequential([hub.KerasLayer("https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1"),
+tf.keras.layers.Dense(91, activation='softmax')])
+
+m.build([None, 320, 320, 3])
 # # inputs = tf.keras.layers.Input(shape=(320, 320, 3))
 # # base = hub.KerasLayer("https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1")
 
