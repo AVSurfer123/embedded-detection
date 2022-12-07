@@ -71,6 +71,9 @@ print("(1) Start Training Loop at: " + loop_start.strftime("%H:%M:%S"))
 #                 ])
 
 
+print("SERVER_IMAGE_DIR: ", SERVER_IMAGE_DIR)
+print("SERVER_LABEL_DIR: ", SERVER_LABEL_DIR)
+
 subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.py",
                     "--image_info_file=server_labels/1670422349137.json",
                     "--image_dir=" + SERVER_IMAGE_DIR,
