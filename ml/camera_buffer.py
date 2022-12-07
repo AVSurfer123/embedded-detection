@@ -13,12 +13,13 @@ IMAGE_SIZE = (320, 320)
 
 class CameraBuffer:
 
-    def __init__(self, MAX_BUFFER_LEN=100):
+    def __init__(self, MAX_BUFFER_LEN=200):
         # Recent frames are at very end of buffer
         self.MAX_BUFFER_LEN = MAX_BUFFER_LEN
         self.image_buffer = []
         self.buffer_lock = threading.Lock()
         self.thread = threading.Thread(target=self.read_camera_thread, daemon=False)
+        self.thread.start()
         self.batch_idx = 0
 
     def read_camera_thread(self):
@@ -39,11 +40,12 @@ class CameraBuffer:
                 if len(self.image_buffer) >= self.MAX_BUFFER_LEN:
                     self.image_buffer.pop(0)
                     self.batch_idx -= 1
-                self.image_buffer.append(image_preprocess(image, IMAGE_SIZE, 0, 1))
+                processed = image_preprocess(image, IMAGE_SIZE, 0, 1)[0]
+                self.image_buffer.append(tf.cast(processed, tf.uint8))
                 self.buffer_lock.release()
         except Exception as e:
-            print(e)
             cap.release()
+            raise e
 
     def get_recent_batch(self, batch_size=8):
         self.buffer_lock.acquire()
@@ -61,3 +63,13 @@ class CameraBuffer:
         self.buffer_lock.release()
         return stream
 
+
+if __name__ == '__main__':
+    c = CameraBuffer(400)
+    time.sleep(10)
+    print(len(c.image_buffer))
+    batch = c.get_recent_batch()
+    print(batch.shape)
+    for b in batch:
+        print(b.shape, b.dtype)
+    time.sleep(100)
