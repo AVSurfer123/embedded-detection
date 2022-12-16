@@ -271,6 +271,7 @@ class ModelInspector(object):
       labels_val[:, 0] = 1
 
       if self.ckpt_path:
+        print("SELF.CKPT_PATH")
         # Load the true weights if available.
         inference.restore_ckpt(sess, self.ckpt_path,
                                self.model_config.moving_average_decay,
@@ -293,6 +294,7 @@ class ModelInspector(object):
       # Build model with inputs and labels.
       inputs = tf.placeholder(tf.float32, name='input', shape=self.inputs_shape)
       self.build_model(inputs)
+      print("EVAL_CKPT")
       inference.restore_ckpt(sess, self.ckpt_path,
                              self.model_config.moving_average_decay,
                              self.export_ckpt)
@@ -303,6 +305,7 @@ class ModelInspector(object):
       inputs = tf.placeholder(tf.float32, name='input', shape=self.inputs_shape)
       outputs = self.build_model(inputs)
 
+      print("FREEZE_MODEL")
       if self.ckpt_path:
         # Load the true weights if available.
         inference.restore_ckpt(sess, self.ckpt_path,
