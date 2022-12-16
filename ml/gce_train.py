@@ -77,8 +77,7 @@ print("SERVER_LABEL_DIR: ", SERVER_LABEL_DIR)
 subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.py",
                     "--image_dir=" + SERVER_IMAGE_DIR,
                     "--object_annotations_file=" + os.path.join(SERVER_LABEL_DIR, "instances_retrain.json"),
-                    "--output_file_prefix=tfrecord/coco",
-                    "--num_shards=32"
+                    "--output_file_prefix=tfrecord/coco"
                 ])
 
 # # Train, Save model chkpt ###############################################################
@@ -101,20 +100,20 @@ subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.p
 # FILE_PATTERN = "tfrecord/*.tfrecord"
 # # FILE_PATTERN = os.path.join(SERVER_IMAGE_DIR, "/*.txt")
 
-# subprocess.run(["python", "../automl/efficientdet/main.py",
-#                     "--mode=train_and_eval",
-#                     "--train_file_pattern=" + FILE_PATTERN,
-#                     "--val_file_pattern=" + FILE_PATTERN,
-#                     "--model_name=efficientdet-d0",
-#                     "--model_dir=/tmp/efficientdet-d0-finetune",
-#                     "--ckpt=efficientdet-d0",
-#                     "--train_batch_size=64",
-#                     "--eval_batch_size=64",
-#                     "--num_examples_per_epoch=5000",
-#                     "--num_epochs=50",
-#                     "--hparams=voc_config.yaml",
-#                     "--val_json_file=tfrecord/json_pascal.json"
-#                 ])
+subprocess.run(["python", "../automl/efficientdet/main.py",
+                    "--mode=train_and_eval",
+                    "--train_file_pattern=" + FILE_PATTERN,
+                    "--val_file_pattern=" + FILE_PATTERN,
+                    "--model_name=efficientdet-d0",
+                    "--model_dir=/tmp/efficientdet-d0-finetune",
+                    "--ckpt=efficientdet-d0",
+                    "--train_batch_size=64",
+                    "--eval_batch_size=64",
+                    "--num_examples_per_epoch=5000",
+                    "--num_epochs=50",
+                    "--hparams=voc_config.yaml",
+                    "--val_json_file=tfrecord/json_pascal.json"
+                ])
 
 # # Convert Model to .tflite and save #####################################################
 # print("(5) Convert model to .tflite...")

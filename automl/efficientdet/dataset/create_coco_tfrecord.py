@@ -330,8 +330,8 @@ def _create_tf_record_from_coco_annotations(image_info_file,
           [(image, image_dir, _get_object_annotation(image['id']),
             category_index, _get_caption_annotation(image['id']), include_masks)
            for image in images])):
-    if idx % 100 == 0:
-      logging.info('On image %d of %d', idx, len(images))
+    # if idx % 100 == 0:
+    logging.info('On image %d of %d', idx, len(images))
 
     total_num_annotations_skipped += num_annotations_skipped
     writers[idx % num_shards].write(tf_example.SerializeToString())
