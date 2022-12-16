@@ -97,7 +97,7 @@ subprocess.run(["python", "../automl/efficientdet/dataset/create_coco_tfrecord.p
 # #     use_fake_data=FLAGS.use_fake_data,
 # #     max_instances_per_image=max_instances_per_image)
 
-# FILE_PATTERN = "tfrecord/*.tfrecord"
+FILE_PATTERN = "tfrecord/*.tfrecord"
 # # FILE_PATTERN = os.path.join(SERVER_IMAGE_DIR, "/*.txt")
 
 subprocess.run(["python", "../automl/efficientdet/main.py",
@@ -109,10 +109,10 @@ subprocess.run(["python", "../automl/efficientdet/main.py",
                     "--ckpt=efficientdet-d0",
                     "--train_batch_size=64",
                     "--eval_batch_size=64",
-                    "--num_examples_per_epoch=5000",
-                    "--num_epochs=50",
-                    "--hparams=voc_config.yaml",
-                    "--val_json_file=tfrecord/json_pascal.json"
+                    "--num_examples_per_epoch=10",
+                    "--num_epochs=50"
+                    # "--hparams=voc_config.yaml",
+                    # "--val_json_file=tfrecord/json_pascal.json"
                 ])
 
 # # Convert Model to .tflite and save #####################################################
