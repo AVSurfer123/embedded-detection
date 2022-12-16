@@ -227,8 +227,11 @@ def _load_object_annotations(object_annotations_file):
   missing_annotation_count = 0
   for image in images:
     image_id = image['id']
+    print("image_id: ", image_id)
     if image_id not in img_to_obj_annotation:
       missing_annotation_count += 1
+
+  print("img_to_obj_annotation:", img_to_obj_annotation)
 
   logging.info('%d images are missing bboxes.', missing_annotation_count)
 
