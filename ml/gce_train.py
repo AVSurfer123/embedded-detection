@@ -107,11 +107,11 @@ subprocess.run(["python", "../automl/efficientdet/main.py",
                     "--model_name=efficientdet-d0",
                     "--model_dir=/tmp/efficientdet-d0-finetune",
                     "--ckpt=efficientdet-d0",
-                    "--train_batch_size=64",
-                    "--eval_batch_size=64",
+                    "--train_batch_size=8",
+                    "--eval_batch_size=8",
                     "--num_examples_per_epoch=10",
-                    "--num_epochs=50"
-                    # "--hparams=voc_config.yaml",
+                    "--num_epochs=50",
+                    "--hparams=coco_config.yaml"
                     # "--val_json_file=tfrecord/json_pascal.json"
                 ])
 
