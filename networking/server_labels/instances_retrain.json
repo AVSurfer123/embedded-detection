@@ -7,7 +7,6 @@
     "contributor": "CS329E",
     "date_created": "2022/12/07"
   },
-  "licenses": [{}],
   "images": [
     {
       "license": 0,
@@ -81,17 +80,17 @@
       "id": 10
   }],
   "categories": [
-    {"id": 0 , "name": "person"},
-    {"id": 1 , "name": "bicycle"}, 
-    {"id": 2 , "name": "car"}, 
-    {"id": 3 , "name": "motorcycle"}, 
-    {"id": 4 , "name": "airplane"}, 
-    {"id": 5 , "name": "bus"}, 
-    {"id": 6 , "name": "train"}, 
-    {"id": 7 , "name": "truck"}, 
-    {"id": 8 , "name": "boat"}, 
-    {"id": 9 , "name": "traffic light"}, 
-    {"id": 10 , "name": "fire hydrant"}, 
+    {"id": 1 , "name": "person"},
+    {"id": 2 , "name": "bicycle"}, 
+    {"id": 3 , "name": "car"}, 
+    {"id": 4 , "name": "motorcycle"}, 
+    {"id": 5 , "name": "airplane"}, 
+    {"id": 6 , "name": "bus"}, 
+    {"id": 7 , "name": "train"}, 
+    {"id": 8 , "name": "truck"}, 
+    {"id": 9 , "name": "boat"}, 
+    {"id": 10 , "name": "traffic light"}, 
+    {"id": 11 , "name": "fire hydrant"}, 
     {"id": 12 , "name": "stop sign"}, 
     {"id": 13 , "name": "parking meter"}, 
     {"id": 14 , "name": "bench"}, 
