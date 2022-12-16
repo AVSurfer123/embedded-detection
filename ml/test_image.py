@@ -34,7 +34,7 @@ def load_model(model_path):
 def process_image(interpreter, image, input_index):
     r"""Process an image, Return a list of detected class ids and positions"""
     input_data = np.expand_dims(image, axis=0)  # expand to 4-dim
-    input_data = input_data.astype(np.float32)
+    # input_data = input_data.astype(np.float32)
 
     # Process
     interpreter.set_tensor(input_index, input_data)
@@ -42,7 +42,7 @@ def process_image(interpreter, image, input_index):
 
     # Get outputs
     output_details = interpreter.get_output_details()
-    # print(output_details)
+    print(output_details)
     # output_details[0] - position
     # output_details[1] - class id
     # output_details[2] - score
@@ -55,51 +55,16 @@ def process_image(interpreter, image, input_index):
     classes = np.squeeze(interpreter.get_tensor(output_details[1]['index']))
     scores = np.squeeze(interpreter.get_tensor(output_details[2]['index']))
 
-    for i in output_details:
-        print("HERE: ", np.squeeze(interpreter.get_tensor(i['index'])).shape)
+    # for i in output_details:
+    #     print("HERE: ", np.squeeze(interpreter.get_tensor(i['index'])).shape)
 
     result = []
 
     for idx, score in enumerate(scores):
-        print(idx, score)
-        print(score.shape)
+        # print(idx, score)
+        # print(score.shape)
         if score > 0.5:
             result.append({'pos': positions[idx], '_id': classes[idx] })
-
-    return result
-
-def process_image2(classifier, image, input_index):
-    r"""Process an image, Return a list of detected class ids and positions"""
-
-    input_data = np.expand_dims(image, axis=0)  # expand to 4-dim
-    result = classifier.predict(input_data)
-    print(result.shape)
-
-    # # Process
-    # interpreter.set_tensor(input_index, input_data)
-    # interpreter.invoke()
-
-    # # Get outputs
-    # output_details = interpreter.get_output_details()
-    # # print(output_details)
-    # # output_details[0] - position
-    # # output_details[1] - class id
-    # # output_details[2] - score
-    # # output_details[3] - count
-    
-    # positions = np.squeeze(interpreter.get_tensor(output_details[0]['index']))
-    # classes = np.squeeze(interpreter.get_tensor(output_details[1]['index']))
-    # scores = np.squeeze(interpreter.get_tensor(output_details[2]['index']))
-
-    # # print(positions)
-    # # print(classes)
-    # # print(scores)
-
-    # result = []
-
-    # for idx, score in enumerate(scores):
-    #     if score > 0.5:
-    #         result.append({'pos': positions[idx], '_id': classes[idx] })
 
     return result
 
@@ -133,21 +98,14 @@ def display_result(result, frame, labels):
 
 if __name__ == "__main__":
 
-    # model_path = 'data/detect.tflite'
-    model_path = 'z_model_new.tflite'
+    model_path = 'data/detect.tflite'
+    model_path = '../automl/efficientdet/efficientdet-lite0.tflite'
     label_path = 'data/coco_labels.txt'
     image_path = 'data/bus.jpg'
     write_path = 'pred/'
 
     interpreter = load_model(model_path)
     labels = load_labels(label_path)
-
-    # classifier_model = "https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1"
-    # classifier = tf.keras.Sequential([
-    #     hub.KerasLayer(classifier_model, input_shape=(320, 320)+(3,))
-    # ])
-
-    # base_model = hub.KerasLayer("https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1")
 
     input_details = interpreter.get_input_details()
     # Get Width and Height
@@ -162,22 +120,21 @@ if __name__ == "__main__":
 
     image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
-    # width = 320
-    # height = 320
     image = image.resize((width, height))
 
     # top_result = dict of {pos: [pos coord %], id: class_id} bounding boxes where score > 0.5
-    top_result = process_image(interpreter, image, input_index)
-    # top_result = process_image2(classifier, image, input_index)
-    # print(top_result)
+    # top_result = process_image(interpreter, image, input_index)
 
-    # timestamp = datetime.now().strftime("%a%d_%H_%M_%S")
-    # filepath = write_path + "single_image/" + timestamp
-    # with open(filepath, 'w') as f:
-    #     np.save(filepath, top_result)
-    # f.close()
+    import tensorflow as tf
+    import tensorflow.lite as tflite
+    from run_tflite import TFLiteRunner
+    runner = TFLiteRunner("../automl/efficientdet/efficientdet-batch8.tflite")
+    prediction = runner.run(image)
+    print(prediction)
+    # new_c_array = save_visualized_image(image, prediction, c_array)
 
-    display_result(top_result, frame, labels)
+
+    # display_result(top_result, frame, labels)
 
     key = cv2.waitKey(0)
     if key == 27:  # esc
